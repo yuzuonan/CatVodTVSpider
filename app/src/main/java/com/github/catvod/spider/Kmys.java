@@ -466,7 +466,7 @@ public class Kmys extends Spider {
                             String a = new String(Base64.decode(jsonObject.getString("a"), Base64.DEFAULT));
                             String k = new String(Base64.decode(jsonObject.getString("k"), Base64.DEFAULT));
                             String z = new String(Base64.decode(jsonObject.getString("z"), Base64.DEFAULT));
-                            String data = decryptByPublicKey(k+z+a);
+                            String data = rsa(k+z+a);
                             signPlayerStr = new JSONObject(data).optString("key");
                         } catch (JSONException e) {
                         } catch (Exception e) {
@@ -482,30 +482,7 @@ public class Kmys extends Spider {
 
     }
 
-    public static  String decryptByPublicKey(String in) {
-        try {
-            RSAPublicKey pubKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.decode("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCt/dLGQj1Iimj0LIUMUXgBGUjsfrm6o1/pZjXXVLL3py2vLktNtSoJU+69v1tUXZqiU9BqMHApVmMOtOnkL5J+ENdLIX3bXnNtfNJpYX4Iz8OBMqKdDch80gN8rLkTPReFkBGsMAndKpc0iMdgd6nts/gQ3wUBNJKpmOG35UateQIDAQAB", Base64.DEFAULT)));
-            Cipher cipher = Cipher.getInstance("RSA/None/PKCS1Padding");
-            cipher.init(Cipher.DECRYPT_MODE, pubKey);
-            byte[] inData = Base64.decode(in, Base64.DEFAULT);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            if (inData.length <= 256) {
-                outputStream.write(cipher.doFinal(inData));
-            } else {
-                for (int i = 0; i < inData.length; i += 256) {
-                    outputStream.write(cipher.doFinal(inData, i, 256));
-                }
-            }
-            outputStream.flush();
-            String result = new String(outputStream.toByteArray(), Misc.CharsetUTF8);
-            outputStream.close();
-            return result;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
-
+    
     String rsa(String in) {
         try {
             RSAPublicKey pubKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.decode("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3VLHgbkFN0ebMaR4e0D\n" +
