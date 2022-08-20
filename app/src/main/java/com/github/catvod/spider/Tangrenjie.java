@@ -3,6 +3,8 @@ package com.github.catvod.spider;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.widget.Switch;
+
 import java.net.URLDecoder;
 
 import com.github.catvod.crawler.Spider;
@@ -450,7 +452,7 @@ public class Tangrenjie extends Spider {
     @Override
     public String searchContent(String key, boolean quick) {
         try {
-            String url = siteUrl + "vod/search.html?wd=" + URLEncoder.encode(key) + "&submit=";
+            String url = siteUrl + "/vod/search.html?wd=" + URLEncoder.encode(key) + "&submit=";
             String html = OkHttpUtil.string(url, getHeaders(url));
             Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
@@ -459,13 +461,29 @@ public class Tangrenjie extends Spider {
                 Elements list = doc.select("li.searchlist_item");
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
+                    String classes = vod.selectFirst("h4.vodlist_title > a >span").text();
+                    String tid="";
+                    switch (classes) {
+                        case "电影":
+                            tid = "1";
+                            break;
+                        case "电视剧":
+                            tid = "2";
+                            break;
+                        case "综艺":
+                            tid = "3";
+                            break;
+                        case "动漫":
+                            tid = "4";
+                            break;
+                    }
                     String title = vod.selectFirst("a.vodlist_thumb").attr("title");
                     String cover = siteUrl + vod.selectFirst("a.vodlist_thumb").attr("data-original");
                     String remark = vod.select("span.pic_text").text();
                     Matcher matcher = regexVid.matcher(vod.selectFirst("a.vodlist_thumb").attr("href"));
                     if (!matcher.find())
                         continue;
-                    String id = matcher.group(1);
+                    String id = tid + "=" + matcher.group(1);
                     JSONObject v = new JSONObject();
                     v.put("vod_id", id);
                     v.put("vod_name", title);
